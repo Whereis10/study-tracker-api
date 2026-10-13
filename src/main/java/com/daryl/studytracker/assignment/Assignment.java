@@ -4,6 +4,9 @@ import java.time.LocalDate;
 
 import com.daryl.studytracker.course.Course;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,11 +24,13 @@ public class Assignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Title is required")
     @Column(nullable = false)
     private String title;
 
+    @NotNull(message = "Due date is required")
     private LocalDate dueDate;
-
+    
     private boolean completed;
 
     @ManyToOne(optional = false)

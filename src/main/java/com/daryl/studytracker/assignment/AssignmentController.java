@@ -17,56 +17,53 @@ import org.springframework.web.server.ResponseStatusException;
 import com.daryl.studytracker.course.Course;
 import com.daryl.studytracker.course.CourseRepository;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/courses/{courseId}/assignments")
 public class AssignmentController {
 
-    private final AssignmentRepository assignmentRepository;
-    private final CourseRepository courseRepository;
+	private final AssignmentRepository assignmentRepository;
+	private final CourseRepository courseRepository;
 
-    public AssignmentController(AssignmentRepository assignmentRepository,
-                                CourseRepository courseRepository) {
-        this.assignmentRepository = assignmentRepository;
-        this.courseRepository = courseRepository;
-    }
+	public AssignmentController(AssignmentRepository assignmentRepository, CourseRepository courseRepository) {
+		this.assignmentRepository = assignmentRepository;
+		this.courseRepository = courseRepository;
+	}
 
-    @GetMapping
-    public List<Assignment> getAssignments(@PathVariable Long courseId) {
-        if (!courseRepository.existsById(courseId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found");
-        }
-        return assignmentRepository.findByCourseId(courseId);
-    }
+	@GetMapping
+	public List<Assignment> getAssignments(@PathVariable Long courseId) {
+		if (!courseRepository.existsById(courseId)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found");
+		}
+		return assignmentRepository.findByCourseId(courseId);
+	}
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Assignment createAssignment(@PathVariable Long courseId,
-                                       @RequestBody Assignment assignment) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
-        assignment.setCourse(course);
-        return assignmentRepository.save(assignment);
-    }
-    
-    @PutMapping("/{id}")
-    public Assignment updateAssignment(@PathVariable Long courseId,
-                                       @PathVariable Long id,
-                                       @RequestBody Assignment updated) {
-        Assignment assignment = assignmentRepository.findById(id)
-                .filter(a -> a.getCourse().getId().equals(courseId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
-        assignment.setTitle(updated.getTitle());
-        assignment.setDueDate(updated.getDueDate());
-        assignment.setCompleted(updated.isCompleted());
-        return assignmentRepository.save(assignment);
-    }
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public Assignment createAssignment(@PathVariable Long courseId, @Valid @RequestBody Assignment assignment) {
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+		assignment.setCourse(course);
+		return assignmentRepository.save(assignment);
+	}
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAssignment(@PathVariable Long courseId, @PathVariable Long id) {
-        Assignment assignment = assignmentRepository.findById(id)
-                .filter(a -> a.getCourse().getId().equals(courseId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
-        assignmentRepository.delete(assignment);
-    }
+	@PutMapping("/{id}")
+	public Assignment updateAssignment(@PathVariable Long courseId, @PathVariable Long id,
+			@Valid @RequestBody Assignment updated) {
+		Assignment assignment = assignmentRepository.findById(id).filter(a -> a.getCourse().getId().equals(courseId))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
+		assignment.setTitle(updated.getTitle());
+		assignment.setDueDate(updated.getDueDate());
+		assignment.setCompleted(updated.isCompleted());
+		return assignmentRepository.save(assignment);
+	}
+
+	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteAssignment(@PathVariable Long courseId, @PathVariable Long id) {
+		Assignment assignment = assignmentRepository.findById(id).filter(a -> a.getCourse().getId().equals(courseId))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignment not found"));
+		assignmentRepository.delete(assignment);
+	}
 }
